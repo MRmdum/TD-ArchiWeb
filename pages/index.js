@@ -44,15 +44,15 @@ export default function Home() {
   const toggleFavorite = async (recipeId) => {
     if (!username) return alert("Veuillez vous connecter pour gérer vos favoris.");
     try {
-      // if (favorites.includes(recipeId)) {
-      //   await axios.delete(`${API_BASE_URL}/users/${username}/favorites`, {
-      //     data: { recipeId },
-      //     withCredentials: true,
-      //   });
-      // } else {
-      //   await axios.post(`${API_BASE_URL}/users/${username}/favorites`, { recipeId }, { withCredentials: true });
-      // }
-      // fetchFavorites();
+      if (favorites.includes(recipeId)) {
+        await axios.delete(`${API_BASE_URL}/users/${username}/favorites`, {
+          data: { recipeId },
+          withCredentials: true,
+        });
+      } else {
+        await axios.post(`${API_BASE_URL}/users/${username}/favorites`, { recipeId }, { withCredentials: true });
+      }
+      fetchFavorites();
     } catch (error) {
       console.error("Error updating favorites:", error);
     }
@@ -76,10 +76,13 @@ export default function Home() {
       </div>
       <ul>
         {recipes.map((recipe) => (
-          <li key={recipe.id} className="border p-2 mb-2">
-            <Link href={`/recettes/${recipe.id}`}>{recipe.name}</Link>
+          <li key={recipe.id} className="border p-2 mb-2 cursor-pointer" onClick={() => router.push(`/recettes/${recipe.id}`)}>
+            <span className="text-blue-600 hover:underline">{recipe.name}</span>
             <button 
-              onClick={() => toggleFavorite(recipe.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(recipe.id);
+              }}
               className={`ml-2 ${favorites.includes(recipe.id) ? 'text-red-500' : 'text-gray-500'}`}
             >
               {favorites.includes(recipe.id) ? "★" : "☆"}
