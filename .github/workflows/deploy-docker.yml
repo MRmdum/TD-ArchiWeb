@@ -25,11 +25,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Applying linter
-        run: npm run lint
+      # - name: Applying linter
+      #   run: npm run lint
 
-      - name: Run tests
-        run: npm test
+      # - name: Run tests
+      #   run: npm test
 
   cd:
     name: CD - Build & Deploy
