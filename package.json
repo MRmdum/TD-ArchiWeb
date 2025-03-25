@@ -3,7 +3,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "next start"
+    "start": "next start -p 80"
   },
   "dependencies": {
     "axios": "^1.8.4",
