@@ -50,7 +50,7 @@ export default function Home() {
             <button 
               onClick={() => toggleFavorite(recipe.id)}
               className={`ml-2 ${favorites.includes(recipe.id) ? 'text-red-500' : 'text-gray-500'}`}
-            >
+            > 
               {favorites.includes(recipe.id) ? "★" : "☆"}
             </button>
           </li>

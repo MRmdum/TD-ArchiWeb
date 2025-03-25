@@ -1,5 +1,21 @@
-// pages/index.js
 import { useState, useEffect } from "react";
+import React from "react";
+
+// reactstrap components
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Card,
+  CardBody,
+  CardImg,
+  CardTitle,
+  CardText,
+} from "reactstrap";
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import { useRouter } from "next/router";
 import Link from "next/link";
 import axios from "axios";
@@ -21,8 +37,27 @@ export default function Home() {
     }
     setUsername(storedUsername);
     fetchRecipes();
-    // fetchFavorites();
+    //fetchFavorites();
+
+    // Check for saved dark mode preference
+    const storedDarkMode = localStorage.getItem("darkMode") === "true";
+    setDarkMode(storedDarkMode);
+    if (storedDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, []);
+
+  useEffect(() => {
+    // Save the dark mode state to localStorage
+    localStorage.setItem("darkMode", darkMode);
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   const fetchRecipes = async () => {
     try {
@@ -30,15 +65,6 @@ export default function Home() {
       setRecipes(response.data);
     } catch (error) {
       console.error("Error fetching recipes:", error);
-    }
-  };
-
-  const fetchFavorites = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/favorites`, { withCredentials: true });
-      setFavorites(response.data);
-    } catch (error) {
-      console.error("Error fetching favorites:", error);
     }
   };
 
@@ -70,41 +96,78 @@ export default function Home() {
   };
 
   return (
-    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} min-h-screen p-6 transition-all`}>
+    <div className={`container mx-auto p-6 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} min-h-screen`}>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-extrabold">🍽️ Recettes Gourmandes</h1>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setDarkMode(!darkMode)} className="p-2 bg-gray-700 text-white rounded-full shadow-lg hover:bg-gray-600 transition-all">
+        <h1 className="text-4xl font-extrabold">🍽️ Nos Recettes Gourmandes: Kappa Edition</h1>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 bg-gray-700 text-white rounded-full hover:bg-gray-600 transition-all"
+          >
             {darkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
           </button>
-          <button onClick={handleLogout} className="p-3 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-all">Se déconnecter</button>
+          <button onClick={handleLogout} className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all">
+            Se déconnecter
+          </button>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <Container className="mt-4">
+      <Row>
+        {/* Titre de la page */}
+        <h1 className="text-center mb-4">🍽️ Recettes Gourmandes</h1>
+      </Row>
+      <Row>
         {recipes.map((recipe) => (
-          <div key={recipe.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl overflow-hidden cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105 flex flex-col items-center p-4" onClick={() => router.push(`/recettes/${recipe.id}`)}>
-            <div className="w-20 h-20 bg-gray-300 dark:bg-gray-700 rounded-full mb-4"></div>
-            <div className="text-center">
-              <h2 className="text-lg font-semibold mb-1">{recipe.name}</h2>
-              <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">{recipe.description}</p>
-              <div className="flex justify-center items-center">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(recipe.id);
-                  }}
-                  className={`text-xl ${favorites.includes(recipe.id) ? 'text-red-500' : 'text-gray-400'} hover:text-red-600 transition-all`}
-                >
-                  {favorites.includes(recipe.id) ? "★" : "☆"}
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <button onClick={() => router.push('/favorites')} className="mt-6 p-4 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all">
-        Voir Favoris
-      </button>
+          <Col sm="12" md="6" lg="3" key={recipe.id} className="mb-4">
+            <Card
+              className="shadow-lg rounded-3"
+              style={{
+                transition: "transform 0.3s, box-shadow 0.3s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+              onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+              onClick={() => router.push(`/recettes/${recipe.id}`)}
+            >
+              {/* Image de la recette */}
+              <CardImg
+                top
+                width="100%"
+                src={recipe.image_url}
+                alt={recipe.name}
+                className="card-img-top"
+                style={{ height: '200px', objectFit: 'cover' }}
+              />
+              <CardBody>
+                {/* Titre et description */}
+                <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
+                <CardText className="text-center text-muted">{recipe.description}</CardText>
+                {/* Liste des ingrédients */}
+                <CardText className="text-center">
+                  <strong>Ingrédients:</strong> {recipe.ingredients?.join(", ") || "Non spécifié"}
+                </CardText>
+                {/* Bouton Favoris */}
+                <div className="d-flex justify-content-center">
+                  <Button
+                    color={favorites.includes(recipe.id) ? "danger" : "secondary"}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(recipe.id);
+                    }}
+                  >
+                    {favorites.includes(recipe.id) ? "★" : "☆"}
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+          ))}
+        </Row>
+        <Row className="justify-content-center mt-4">
+          <Button onClick={() => router.push('/favorites')} color="primary">
+            Voir Favoris
+          </Button>
+        </Row>
+      </Container>
     </div>
   );
 }

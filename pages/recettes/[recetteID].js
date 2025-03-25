@@ -35,7 +35,7 @@ export default function RecetteDetail() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">{recipe.name}</h1>
-      <img src={recipe.image_url} alt={recipe.name} className="w-full max-w-lg rounded-lg mb-4" />
+      <img src={recipe.image_url} alt={recipe.name} className="w-full max-w-lg rounded-lg mb-4" style={{ width: '300px' }} />
       <p><strong>Catégorie:</strong> {recipe.category}</p>
       <p><strong>Calories:</strong> {recipe.calories}</p>
       <p><strong>Temps de préparation:</strong> {recipe.prep_time} minutes</p>
