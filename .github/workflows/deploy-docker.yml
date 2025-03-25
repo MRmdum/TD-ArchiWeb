@@ -51,7 +51,10 @@ jobs:
 
       - name: Build project
         run: npm run build
-
+        
+      - name: Debug Secrets
+        run: echo "Docker Username: ${{ secrets.DOCKERHUB_USERNAME }}"
+        
       - name: Log into Docker Hub
         uses: docker/login-action@v3
         with:
