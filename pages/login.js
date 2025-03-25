@@ -16,7 +16,7 @@ export default function Login() {
     try {
     //   await axios.post(`${API_BASE_URL}/login`, { username, password }, { withCredentials: true });
     //   localStorage.setItem("username", username);
-        localStorage.setItem("username", "user");
+        localStorage.setItem("username", "defaultUser");
         router.push("/");
     } catch (error) {
         setError("Échec de la connexion. Vérifiez vos identifiants.");
