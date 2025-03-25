@@ -19,7 +19,7 @@ WORKDIR /app
 # Définition des variables d'environnement
 ENV HOST 0.0.0.0
 ENV PORT 80
-ENV ORIGIN https://chi.cours.quimerch.com
+ENV ORIGIN https://kapp.cours.quimerch.com
 
 # Copier uniquement les fichiers nécessaires depuis l'étape de build
 COPY --from=builder /app/package.json /app/package-lock.json ./
