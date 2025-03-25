@@ -53,13 +53,19 @@ jobs:
         run: npm run build
         
       - name: Debug Secrets
-        run: echo "Docker Username ${{ secrets.DOCKERHUB_USERNAME }}"
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: echo "Docker Username ${{ env.DOCKERHUB_USERNAME }}"
 
       - name: Log into Docker Hub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
         run: docker build -t ${{ vars.IMAGE_NAME }}:latest .
