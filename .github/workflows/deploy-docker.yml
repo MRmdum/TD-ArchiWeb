@@ -51,24 +51,15 @@ jobs:
 
       - name: Build project
         run: npm run build
-        
-      - name: Debug Secrets
-        env:
-          DOCKER_HUB__USER: ${{ secrets.DOCKER_HUB__USER }}
-          DOCKER_HUB__TOKEN: ${{ secrets.DOCKER_HUB__TOKEN }}
-        run: echo "Docker Username ${{ secrets.DOCKER_HUB__USER }}"
 
       - name: Log into Docker Hub
-        env:
-          DOCKER_HUB__USER: ${{ secrets.DOCKER_HUB__USER }}
-          DOCKER_HUB__TOKEN: ${{ secrets.DOCKER_HUB__TOKEN }}
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKER_HUB__USER }}
+          username: ${{ secrets.DOCKER_HUB__USER }}
           password: ${{ secrets.DOCKER_HUB__TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t ${{ vars.IMAGE_NAME }}:latest .
+        run: docker build -t ${{ secrets.DOCKER_HUB__USER }}/${{ vars.IMAGE_NAME }}:latest .
 
       - name: Push Docker image to Docker Hub
-        run: docker push ${{ vars.IMAGE_NAME }}:latest
+        run: docker push ${{ secrets.DOCKER_HUB__USER }}/${{ vars.IMAGE_NAME }}:latest
