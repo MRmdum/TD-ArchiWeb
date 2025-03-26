@@ -1,29 +1,15 @@
 import { useState, useEffect } from "react";
 import React from "react";
-
-// reactstrap components
 import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Card,
-  CardBody,
-  CardImg,
-  CardTitle,
-  CardText,
+  Container, Row, Col, Button, Card, CardBody, CardImg, CardTitle, CardText
 } from "reactstrap";
-
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 import { useRouter } from "next/router";
-import Link from "next/link";
 import axios from "axios";
 
 const API_BASE_URL = "https://gourmet.cours.quimerch.com";
 
-export default function Home() {
-  const [recipes, setRecipes] = useState([]);
+export default function Home({ recipes }) {
   const [favorites, setFavorites] = useState([]);
   const [username, setUsername] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
@@ -36,8 +22,6 @@ export default function Home() {
       return;
     }
     setUsername(storedUsername);
-    fetchRecipes();
-    //fetchFavorites();
 
     // Check for saved dark mode preference
     const storedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -58,15 +42,6 @@ export default function Home() {
       document.documentElement.classList.remove("dark");
     }
   }, [darkMode]);
-
-  const fetchRecipes = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/recipes`);
-      setRecipes(response.data);
-    } catch (error) {
-      console.error("Error fetching recipes:", error);
-    }
-  };
 
   const toggleFavorite = async (recipeId) => {
     if (!username) return alert("Veuillez vous connecter pour gérer vos favoris.");
@@ -112,55 +87,54 @@ export default function Home() {
         </div>
       </div>
       <Container className="mt-4">
-      <Row>
-        {/* Titre de la page */}
-        <h1 className="text-center mb-4">🍽️ Recettes Gourmandes</h1>
-      </Row>
-      <Row>
-        {recipes.map((recipe) => (
-          <Col sm="12" md="6" lg="3" key={recipe.id} className="mb-4">
-            <Card
-              className="shadow-lg rounded-3"
-              style={{
-                transition: "transform 0.3s, box-shadow 0.3s",
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-              onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-              onClick={() => router.push(`/recettes/${recipe.id}`)}
-            >
-              {/* Image de la recette */}
-              <CardImg
-                top
-                width="100%"
-                src={recipe.image_url}
-                alt={recipe.name}
-                className="card-img-top"
-                style={{ height: '200px', objectFit: 'cover' }}
-              />
-              <CardBody>
-                {/* Titre et description */}
-                <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
-                <CardText className="text-center text-muted">{recipe.description}</CardText>
-                {/* Liste des ingrédients */}
-                <CardText className="text-center">
-                  <strong>Ingrédients:</strong> {recipe.ingredients?.join(", ") || "Non spécifié"}
-                </CardText>
-                {/* Bouton Favoris */}
-                <div className="d-flex justify-content-center">
-                  <Button
-                    color={favorites.includes(recipe.id) ? "danger" : "secondary"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(recipe.id);
-                    }}
-                  >
-                    {favorites.includes(recipe.id) ? "★" : "☆"}
-                  </Button>
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
-          ))}
+        <Row>
+          <h1 className="text-center mb-4">🍽️ Recettes Gourmandes</h1>
+        </Row>
+        <Row>
+          {Array.isArray(recipes) && recipes.length > 0 ? (
+            recipes.map((recipe) => (
+              <Col sm="12" md="6" lg="3" key={recipe.id} className="mb-4">
+                <Card
+                  className="shadow-lg rounded-3"
+                  style={{
+                    transition: "transform 0.3s, box-shadow 0.3s",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                  onClick={() => router.push(`/recettes/${recipe.id}`)}
+                >
+                  <CardImg
+                    top
+                    width="100%"
+                    src={recipe.image_url}
+                    alt={recipe.name}
+                    className="card-img-top"
+                    style={{ height: '200px', objectFit: 'cover' }}
+                  />
+                  <CardBody>
+                    <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
+                    <CardText className="text-center text-muted">{recipe.description}</CardText>
+                    <CardText className="text-center">
+                      <strong>Ingrédients:</strong> {recipe.ingredients?.join(", ") || "Non spécifié"}
+                    </CardText>
+                    <div className="d-flex justify-content-center">
+                      <Button
+                        color="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(recipe.id);
+                        }}
+                      >
+                        ☆
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Col>
+            ))
+          ) : (
+            <p className="text-center text-muted">Aucune recette disponible.</p>
+          )}
         </Row>
         <Row className="justify-content-center mt-4">
           <Button onClick={() => router.push('/favorites')} color="primary">
@@ -170,4 +144,23 @@ export default function Home() {
       </Container>
     </div>
   );
+}
+
+export async function getStaticProps() {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/recipes`);
+    return {
+      props: {
+        recipes: response.data || [], // Ensure it's always an array
+      },
+      revalidate: 60, // Rebuild every 60s
+    };
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    return {
+      props: {
+        recipes: [], // Ensure recipes is an empty array on failure
+      },
+    };
+  }
 }
