@@ -2,6 +2,6 @@ services:
   kappa_recipes:
     build: .
     ports:
-      - '3000:80'
+      - '80:80'
     container_name: kappa_recipes
     restart: unless-stopped
