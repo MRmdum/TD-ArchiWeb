@@ -1,13 +1,12 @@
+
 import { useState, useEffect, useRef } from "react";
 import React from "react";
-import { Container, Row, Col, Button, Card, CardBody, CardImg, CardTitle, CardText } from "reactstrap";
+import { Container, Row, Col, Button, Card, CardBody, CardTitle, CardText } from "reactstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useRouter } from "next/router";
 import axios from "axios";
-
-import Image from 'next/image';
+import Image from 'next/image';  // Import next/image
 import Head from 'next/head';
-
 
 const API_BASE_URL = "https://gourmet.cours.quimerch.com";
 
@@ -104,7 +103,7 @@ export default function Home({ initialRecipes = [] }) {
 
   return (
     <>
-      <Head>
+      {/* <Head>
         {initialRecipes?.slice(0, 4).map((recipe) => (
           recipe.image_url && (
             <link
@@ -116,9 +115,10 @@ export default function Home({ initialRecipes = [] }) {
             />
           )
         ))}
-      </Head>
+      </Head> */}
 
-      <Container className="mt-4">
+      <Container className="mt-4" style={{ position: "relative", zIndex: 1 }}>
+        {/* Content */}
         <Row className="justify-content-between align-items-center mb-4">
           <h1 className="text-4xl font-extrabold">🍽️ Nos Recettes Gourmandes</h1>
           <div>
@@ -151,15 +151,16 @@ export default function Home({ initialRecipes = [] }) {
                     onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                     onClick={() => router.push(`/recettes/${recipe.id}`)}
                   >
-                    <CardImg
-                      top
-                      width="100%"
-                      src={recipe.image_url}
-                      alt={recipe.name}
-                      loading={index < 4 ? "eager" : "lazy"}
-                      fetchpriority={index < 4 ? "high" : "auto"}
-                      style={{ height: '200px', objectFit: 'cover' }}
-                    />
+                    <div style={{ position: 'relative', height: '200px' }}>
+                    <Image
+                        src={`/api/proxy?url=${encodeURIComponent(recipe.image_url)}`}
+                        alt={recipe.name}
+                        layout="fill"
+                        objectFit="cover"
+                        priority={index < 4} // Make first few images load eagerly
+                        fetchpriority={index < 4 ? "high" : "auto"}
+                      />
+                    </div>
                     <CardBody>
                       <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
                       <CardText className="text-center text-muted">{recipe.description}</CardText>
@@ -193,6 +194,26 @@ export default function Home({ initialRecipes = [] }) {
           )}
         </Row>
       </Container>
+
+      {/* Fixed Background Image */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: -1, // Ensure the background is behind all content
+        }}
+      >
+        <Image
+          src="/cuisine.jpg" // Make sure the image is in the public folder
+          alt="Background Image"
+          layout="fill"
+          objectFit="cover"
+          quality={100}
+        />
+      </div>
     </>
   );
 }
