@@ -1,9 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import React from "react";
 import { Container, Row, Col, Button, Card, CardBody, CardImg, CardTitle, CardText } from "reactstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useRouter } from "next/router";
 import axios from "axios";
+
+import Image from 'next/image';
+import Head from 'next/head';
+
 
 const API_BASE_URL = "https://gourmet.cours.quimerch.com";
 
@@ -13,11 +17,38 @@ export async function getServerSideProps() {
     return { props: { initialRecipes: response.data || [] } };  // Ensure it's always an array
   } catch (error) {
     console.error("Error fetching recipes:", error);
-    return { props: { initialRecipes: [] } };  // Return an empty array on error
+    return { props: { initialRecipes: [] } }; 
   }
 }
 
-export default function Home({ initialRecipes = [] }) {  // Default to empty array
+function LazyCard({ children }) {
+  const ref = useRef();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref}>
+      {visible ? children : <div style={{ height: "400px" }} />} {/* placeholder height */}
+    </div>
+  );
+}
+
+export default function Home({ initialRecipes = [] }) {
   const [recipes, setRecipes] = useState(initialRecipes);
   const [favorites, setFavorites] = useState([]);
   const [username, setUsername] = useState(null);
@@ -72,68 +103,96 @@ export default function Home({ initialRecipes = [] }) {  // Default to empty arr
   };
 
   return (
-    <Container className="mt-4">
-      <Row className="justify-content-between align-items-center mb-4">
-        <h1 className="text-4xl font-extrabold">🍽️ Nos Recettes Gourmandes</h1>
-        <div>
-          {username ? (
-            <>
-              <Button color="primary" onClick={() => router.push('/favorites')} className="me-2">
-                Voir Favoris
-              </Button>
-              <Button color="danger" onClick={handleLogout}>
-                Se Déconnecter
-              </Button>
-            </>
-          ) : (
-            <Button color="success" onClick={() => router.push('/login')}>
-              Se Connecter
-            </Button>
-          )}
-        </div>
-      </Row>
+    <>
+      <Head>
+        {initialRecipes?.slice(0, 4).map((recipe) => (
+          recipe.image_url && (
+            <link
+              key={recipe.id}
+              rel="preload"
+              as="image"
+              href={recipe.image_url}
+              type="image/jpeg"
+            />
+          )
+        ))}
+      </Head>
 
-      <Row>
-        {initialRecipes?.length > 0 ? (
-          recipes.map((recipe) => (
-            <Col sm="12" md="6" lg="3" key={recipe.id} className="mb-4">
-              <Card
-                className="shadow-lg rounded-3"
-                style={{ transition: "transform 0.3s, box-shadow 0.3s" }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-                onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                onClick={() => router.push(`/recettes/${recipe.id}`)}
-              >
-                <CardImg top width="100%" src={recipe.image_url} alt={recipe.name} style={{ height: '200px', objectFit: 'cover' }} />
-                <CardBody>
-                  <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
-                  <CardText className="text-center text-muted">{recipe.description}</CardText>
-                  <CardText className="text-center">
-                    <strong>Ingrédients:</strong> {recipe.ingredients?.join(", ") || "Non spécifié"}
-                  </CardText>
-                  {username && (
-                    <div className="d-flex justify-content-center">
-                      <Button
-                        color={favorites.includes(recipe.id) ? "danger" : "secondary"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(recipe.id);
-                        }}
-                      >
-                        {favorites.includes(recipe.id) ? "★" : "☆"}
-                      </Button>
-                    </div>
-                  )}
-                </CardBody>
-              </Card>
+      <Container className="mt-4">
+        <Row className="justify-content-between align-items-center mb-4">
+          <h1 className="text-4xl font-extrabold">🍽️ Nos Recettes Gourmandes</h1>
+          <div>
+            {username ? (
+              <>
+                <Button color="primary" onClick={() => router.push('/favorites')} className="me-2">
+                  Voir Favoris
+                </Button>
+                <Button color="danger" onClick={handleLogout}>
+                  Se Déconnecter
+                </Button>
+              </>
+            ) : (
+              <Button color="success" onClick={() => router.push('/login')}>
+                Se Connecter
+              </Button>
+            )}
+          </div>
+        </Row>
+
+        <Row>
+          {initialRecipes?.length > 0 ? (
+            recipes.map((recipe, index) => {
+              const card = (
+                <Col sm="12" md="6" lg="3" key={recipe.id} className="mb-4">
+                  <Card
+                    className="shadow-lg rounded-3"
+                    style={{ transition: "transform 0.3s, box-shadow 0.3s" }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                    onClick={() => router.push(`/recettes/${recipe.id}`)}
+                  >
+                    <CardImg
+                      top
+                      width="100%"
+                      src={recipe.image_url}
+                      alt={recipe.name}
+                      loading={index < 4 ? "eager" : "lazy"}
+                      fetchpriority={index < 4 ? "high" : "auto"}
+                      style={{ height: '200px', objectFit: 'cover' }}
+                    />
+                    <CardBody>
+                      <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
+                      <CardText className="text-center text-muted">{recipe.description}</CardText>
+                      <CardText className="text-center">
+                        <strong>Ingrédients:</strong> {recipe.ingredients?.join(", ") || "Non spécifié"}
+                      </CardText>
+                      {username && (
+                        <div className="d-flex justify-content-center">
+                          <Button
+                            color={favorites.includes(recipe.id) ? "danger" : "secondary"}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(recipe.id);
+                            }}
+                          >
+                            {favorites.includes(recipe.id) ? "★" : "☆"}
+                          </Button>
+                        </div>
+                      )}
+                    </CardBody>
+                  </Card>
+                </Col>
+              );
+            
+              return index < 4 ? card : <LazyCard key={recipe.id}>{card}</LazyCard>;
+            })
+          ) : (
+            <Col className="text-center mt-4">
+              <h3>Aucune recette disponible pour le moment.</h3>
             </Col>
-          ))
-        ) : (
-          <Col className="text-center mt-4">
-            <h3>Aucune recette disponible pour le moment.</h3>
-          </Col>
-        )}
-      </Row>
-    </Container>
+          )}
+        </Row>
+      </Container>
+    </>
   );
 }

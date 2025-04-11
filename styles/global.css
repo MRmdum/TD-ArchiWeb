@@ -1,12 +1,12 @@
-@import "tailwindcss";
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-
 html,
 body {
   padding: 0;
   margin: 0;
+  background-image: url('/cuisine.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
   font-family:
     Inter,
     -apple-system,
