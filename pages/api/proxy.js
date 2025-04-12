@@ -1,27 +1,73 @@
 // pages/api/proxy.js
-
 import axios from 'axios';
+import sharp from 'sharp';
+
+const allowedMimeTypes = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/bmp',
+  'image/gif',
+  'image/apng',
+  'image/avif',
+  'image/svg+xml',
+  'image/tiff',
+  'image/x-icon',
+  'image/vnd.microsoft.icon',
+];
+
+const allowedDomains = ['www.croquonslavie.fr', 'localhost', 'kappa.cours.quimerch.com'];
 
 export default async function handler(req, res) {
-  const { url } = req.query;
+  const { url, width = 0, height = 0 } = req.query;
 
   if (!url) {
-    return res.status(400).json({ error: 'Image URL is required' });
+    return res.status(400).send('Missing image URL');
+  }
+
+  const decodedUrl = decodeURIComponent(url);
+  const urlObj = new URL(decodedUrl);
+
+  // Domain check for safety
+  if (!allowedDomains.includes(urlObj.hostname)) {
+    return res.status(403).send('Forbidden domain');
   }
 
   try {
-    const imageResponse = await axios.get(url, {
-      responseType: 'arraybuffer', // to fetch image as a binary buffer
+    const response = await axios.get(decodedUrl, {
+      responseType: 'arraybuffer',
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/89.0.4389.82 Safari/537.36',
+        'Referer': urlObj.origin, // May help with 403
+        'Accept': 'image/*,*/*;q=0.8',
+      },
     });
 
-    const contentType = imageResponse.headers['content-type'];
-    res.setHeader('Content-Type', contentType);
+    const contentType = response.headers['content-type'];
 
-    // Add Cache-Control header to cache the image
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // Cache for 1 year
+    if (!allowedMimeTypes.some((type) => contentType.includes(type))) {
+      return res.status(415).send('Unsupported media type');
+    }
 
-    res.status(200).send(imageResponse.data);
+    const inputBuffer = Buffer.from(response.data);
+
+    // Optional: Transform image to WebP for size savings
+    let outputBuffer;
+    if (parseInt(width) > 0 || parseInt(height) > 0) {
+      outputBuffer = await sharp(inputBuffer)
+        .resize(parseInt(width), parseInt(height))
+        .webp({ quality: 80 })
+        .toBuffer();
+    } else {
+      outputBuffer = await sharp(inputBuffer).webp({ quality: 80 }).toBuffer();
+    }
+
+    res.setHeader('Content-Type', 'image/webp');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(outputBuffer);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch image from the provided URL' });
+    console.error('Error fetching image:', error.message);
+    return res.status(500).send('Failed to fetch image');
   }
 }

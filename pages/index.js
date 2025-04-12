@@ -142,50 +142,57 @@ export default function Home({ initialRecipes = [] }) {
         <Row>
           {initialRecipes?.length > 0 ? (
             recipes.map((recipe, index) => {
-              const card = (
-                <Col sm="12" md="6" lg="3" key={recipe.id} className="mb-4">
-                  <Card
-                    className="shadow-lg rounded-3"
-                    style={{ transition: "transform 0.3s, box-shadow 0.3s" }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
-                    onClick={() => router.push(`/recettes/${recipe.id}`)}
-                  >
-                    <div style={{ position: 'relative', height: '200px' }}>
+              const cardContent = (
+                <Card
+                  className="shadow-lg rounded-3"
+                  style={{ transition: "transform 0.3s, box-shadow 0.3s" }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                  onClick={() => router.push(`/recettes/${recipe.id}`)}
+                >
+                  <div style={{ position: 'relative', height: '200px' }}>
                     <Image
-                        src={`/api/proxy?url=${encodeURIComponent(recipe.image_url)}`}
-                        alt={recipe.name}
-                        layout="fill"
-                        objectFit="cover"
-                        priority={index < 4} // Make first few images load eagerly
-                        fetchpriority={index < 4 ? "high" : "auto"}
-                      />
-                    </div>
-                    <CardBody>
-                      <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
-                      <CardText className="text-center text-muted">{recipe.description}</CardText>
-                      <CardText className="text-center">
-                        <strong>Ingrédients:</strong> {recipe.ingredients?.join(", ") || "Non spécifié"}
-                      </CardText>
-                      {username && (
-                        <div className="d-flex justify-content-center">
-                          <Button
-                            color={favorites.includes(recipe.id) ? "danger" : "secondary"}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(recipe.id);
-                            }}
-                          >
-                            {favorites.includes(recipe.id) ? "★" : "☆"}
-                          </Button>
-                        </div>
+                      src={`/api/proxy?url=${encodeURIComponent(recipe.image_url)}`}
+                      alt={recipe.name}
+                      fill
+                      className="object-cover"
+                      priority={index < 4}
+                      fetchPriority={index < 4 ? "high" : "auto"}
+                    />
+                  </div>
+                  <CardBody>
+                    <CardTitle tag="h5" className="text-center">{recipe.name}</CardTitle>
+                    <CardText className="text-center text-muted">{recipe.description}</CardText>
+                    <CardText className="text-center">
+                      <strong>Préparation:</strong>{" "}
+                      {recipe.cook_time && recipe.cook_time > 0 ? (
+                        <span>{recipe.cook_time} min</span>
+                      ) : (
+                        "Non spécifié"
                       )}
-                    </CardBody>
-                  </Card>
-                </Col>
+                    </CardText>
+                    {username && (
+                      <div className="d-flex justify-content-center">
+                        <Button
+                          color={favorites.includes(recipe.id) ? "danger" : "secondary"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(recipe.id);
+                          }}
+                        >
+                          {favorites.includes(recipe.id) ? "★" : "☆"}
+                        </Button>
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
               );
             
-              return index < 4 ? card : <LazyCard key={recipe.id}>{card}</LazyCard>;
+              return (
+                <Col sm="12" md="6" lg="3" key={recipe.id} className="mb-4">
+                  {index < 4 ? cardContent : <LazyCard>{cardContent}</LazyCard>}
+                </Col>
+              );
             })
           ) : (
             <Col className="text-center mt-4">
