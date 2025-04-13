@@ -1,19 +1,28 @@
 import { useRouter } from "next/router";
 import axios from "axios";
 import Cookies from "js-cookie";
-
+import DOMPurify from "dompurify"; // Import DOMPurify for XSS sanitization
 
 const API_BASE_URL = "https://gourmet.cours.quimerch.com";
 
 export default function Login() {
   const router = useRouter();
 
+  // Function to sanitize user inputs
+  const sanitizeInput = (input) => {
+    return DOMPurify.sanitize(input);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     
     const formData = new FormData(e.target);
-    const username = formData.get("username");
-    const password = formData.get("password");
+    let username = formData.get("username");
+    let password = formData.get("password");
+
+    // Sanitize the inputs to prevent injections
+    username = sanitizeInput(username);
+    password = sanitizeInput(password);
 
     try {
       const response = await axios.post(
@@ -22,18 +31,17 @@ export default function Login() {
         { withCredentials: true }
       );
       
-
-      const token = response.data.token; // Ensure API returns { token: "..." }
+      const token = response.data.token;
 
       if (token) {
-        Cookies.set("jwt", token, { expires: 7, secure: true }); // Store JWT for 7 days
+        Cookies.set("jwt", token, { expires: 1, secure: true }); //1 day expiration
+        sessionStorage.setItem("username", username);
         router.push("/");
       } else {
         alert("Login failed. No token received.");
       }
-      
     } catch (err) {
-      alert("Error in connexion: \n"+err);
+      alert("Error in connexion: \n" + err);
     }
   };
 
