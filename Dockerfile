@@ -1,4 +1,3 @@
-#test avec plagiat
 # Etape 1: Build
 FROM node:23-alpine AS base
 
