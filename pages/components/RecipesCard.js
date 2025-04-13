@@ -4,8 +4,9 @@ import RecipeImage from "./RecipeImage";
 import Cookies from "js-cookie";
 
 export default function RecipesCard({ recipe, index, favorites, username, onToggleFavorite, router }) {
-  const isFavorite = favorites.some((fav) => fav.recipe?.id === recipe.id);
+  //const isFavorite = (favorites || []).some(f => f.recipe?.id === recipe.id);
 
+  if(!recipe) return null;
   return (
     <Card
       className="shadow-lg rounded-3"
