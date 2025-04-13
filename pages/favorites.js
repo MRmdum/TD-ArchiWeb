@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Cookies from "js-cookie";
 import RecipesCard from "./components/RecipesCard";
+import Image from 'next/image';
 
 const API_BASE_URL = "https://gourmet.cours.quimerch.com";
 
@@ -90,15 +91,23 @@ export default function Favorites() {
   };
 
   return (
+    <>
     <Container className="mt-4" style={{ position: "relative", zIndex: 1 }}>
+      <Row className="mb-3">
+        <Col>
+          <Button color="secondary" className="me-2" onClick={() => router.push("/")}>
+                  Retour à l'accueil
+          </Button>
+        </Col>
+      </Row>
       <Row>
         {favorites?.length > 0 ? (
           favorites.map((favObj, index) => (
             <Col sm="12" md="6" lg="3" key={favObj.recipe.id} className="mb-4">
               <RecipesCard
-                recipe={favObj.recipe} // ✅ pass the actual recipe object
+                recipe={favObj.recipe}
                 index={index}
-                favorites={favorites.map(f => f.recipe.id)} // keep your ID list accurate
+                favorites={favorites.map(f => f.recipe.id)}
                 username={username}
                 onToggleFavorite={toggleFavorite}
                 router={router}
@@ -112,5 +121,24 @@ export default function Favorites() {
         )}
       </Row>
     </Container>
+    <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: -1,
+        }}
+      >
+        <Image
+          src="/cuisine.jpg"
+          alt="Background Image"
+          fill
+          style={{ objectFit: 'cover' }}
+          quality={100}
+        />
+      </div>
+    </>
   );
 }

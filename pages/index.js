@@ -230,14 +230,14 @@ export default function Home({ initialRecipes = [] }) {
           left: 0,
           width: "100%",
           height: "100%",
-          zIndex: -1, // Ensure the background is behind all content
+          zIndex: -1,
         }}
       >
         <Image
-          src="/cuisine.jpg" // Make sure the image is in the public folder
+          src="/cuisine.jpg"
           alt="Background Image"
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: 'cover' }}
           quality={100}
         />
       </div>

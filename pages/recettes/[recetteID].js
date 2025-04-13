@@ -5,6 +5,7 @@ import { Container, Row, Col, Button, Spinner } from "reactstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Image from "next/image";
 import Cookies from "js-cookie";
+import RecipeImage from "../components/RecipeImage";
 
 const API_BASE_URL = "https://gourmet.cours.quimerch.com";
 
@@ -127,14 +128,15 @@ export default function RecetteDetail() {
 
         <Row>
           <Col md="6" className="mb-4">
-            <img
-              src={recipe.image_url}
+            <Image
+              src={`/api/proxy?url=${encodeURIComponent(recipe.image_url)}`}
               alt={recipe.name}
-              className="img-fluid rounded shadow"
-              style={{ maxHeight: "400px", objectFit: "cover" }}
+              width={600}
+              height={400}
+              className="rounded shadow"
+              style={{ objectFit: "cover", width: "100%", height: "auto" }}
             />
           </Col>
-
           <Col md="6">
             <p><strong>Catégorie:</strong> {recipe.category}</p>
             <p><strong>Calories:</strong> {recipe.calories}</p>

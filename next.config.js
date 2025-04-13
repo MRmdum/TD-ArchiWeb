@@ -2,7 +2,13 @@
 const nextConfig = {
     output: "standalone",
     images: {
-      domains: ['media.istockphoto.com'],
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'kappa.cours.quimerch.com',
+          pathname: '/api/proxy',
+        }
+      ]
     },  
   };
   
