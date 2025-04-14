@@ -10,7 +10,7 @@ export default function RecipeImage({ src, alt, ...props }) {
 
   const imageSrc = hasError
     ? "/pic_kappa.webp"
-    : `/api/proxy?url=${encodeURIComponent(src)}`;
+    : `/api/proxy?url=${encodeURIComponent(src)}`;//`/api/proxy?url=${encodeURIComponent(src)}`;
 
   return (
     <Image
@@ -18,6 +18,7 @@ export default function RecipeImage({ src, alt, ...props }) {
       alt={alt}
       onError={handleError}
       fill
+      unoptimized 
       className="object-cover"
       {...props}
     />

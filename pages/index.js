@@ -5,7 +5,7 @@ import { Container, Row, Col, Button, Card, CardBody, CardTitle, CardText } from
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useRouter } from "next/router";
 import axios from "axios";
-import Image from 'next/image';  // Import next/image
+import Image from 'next/image';
 import Head from 'next/head';
 import RecipeImage from "./components/RecipeImage";
 import RecipesCard from "./components/RecipesCard";
@@ -90,19 +90,22 @@ export default function Home({ initialRecipes = [] }) {
         return alert("Please log in to view your favorites.");
       }
 
-      const response = await axios.get(
-        `${API_BASE_URL}/users/${username}/favorites`,
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            Accept: "application/json",
-          },
-          withCredentials: true, 
-        }
-      );
-  
-      const favoritesData = response.data || [];
-      setFavorites(favoritesData);
+      try{
+          const response = await axios.get(
+          `${API_BASE_URL}/users/${username}/favorites`,
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+              Accept: "application/json",
+            },
+            withCredentials: true, 
+          }
+        );
+        const favoritesData = response.data || [];
+        setFavorites(favoritesData);
+      } catch{
+        handleLogout();
+      }
     } catch (error) {
       console.error("Error fetching favorites:", error);
     }
