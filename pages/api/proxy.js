@@ -19,11 +19,15 @@ const allowedMimeTypes = [
 const allowedDomains = ['www.croquonslavie.fr', 'localhost', 'kappa.cours.quimerch.com'];
 
 export default async function handler(req, res) {
-  const { url, width = 0, height = 0 } = req.query;
+  const { url, w, h, q } = req.query;
 
   if (!url) {
     return res.status(400).send('Missing image URL');
   }
+
+  const width = parseInt(w) || null;
+  const height = parseInt(h) || null;
+  const quality = parseInt(q) || 75;
 
   const decodedUrl = decodeURIComponent(url);
   const urlObj = new URL(decodedUrl);
@@ -39,7 +43,7 @@ export default async function handler(req, res) {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/89.0.4389.82 Safari/537.36',
-        'Referer': urlObj.origin, // May help with 403
+        'Referer': urlObj.origin,
         'Accept': 'image/*,*/*;q=0.8',
       },
     });
@@ -54,13 +58,16 @@ export default async function handler(req, res) {
 
     // Optional: Transform image to WebP for size savings
     let outputBuffer;
-    if (parseInt(width) > 0 || parseInt(height) > 0) {
+
+    if (width || height) {
       outputBuffer = await sharp(inputBuffer)
-        .resize(parseInt(width), parseInt(height))
-        .webp({ quality: 80 })
+        .resize(width, height)
+        .webp({ quality })
         .toBuffer();
     } else {
-      outputBuffer = await sharp(inputBuffer).webp({ quality: 80 }).toBuffer();
+      outputBuffer = await sharp(inputBuffer)
+        .webp({ quality })
+        .toBuffer();
     }
 
     res.setHeader('Content-Type', 'image/webp');

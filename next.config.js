@@ -7,6 +7,11 @@ const nextConfig = {
           protocol: 'https',
           hostname: 'kappa.cours.quimerch.com',
           pathname: '/api/proxy',
+        },
+        {
+          protocol: 'https',
+          hostname: 'localhost',
+          pathname: '/api/proxy',
         }
       ]
     },  

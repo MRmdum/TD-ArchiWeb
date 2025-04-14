@@ -9,7 +9,7 @@ export default function RecipeImage({ src, alt, ...props }) {
   };
 
   const imageSrc = hasError
-    ? "/pic_kappa.webp" // Make sure this exists in /public
+    ? "/pic_kappa.webp"
     : `/api/proxy?url=${encodeURIComponent(src)}`;
 
   return (
